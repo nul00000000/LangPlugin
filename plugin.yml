@@ -1,0 +1,13 @@
+--- 
+api-version: 1.13
+main: org.adamsinventions.LangPlugin
+name: LangPlugin
+version: 0.1
+depend: [WorldGuard]
+commands: 
+  encant:
+    description: It enchants items without limits
+    usage: /encant [player] <enchantment> [level]
+  attrib:
+    description: It adds or removes attribute modifiers
+    usage: /attrib <add|remove> [player] <attribute> <amount> <operation>
