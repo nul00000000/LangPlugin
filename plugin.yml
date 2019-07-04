@@ -11,3 +11,16 @@ commands:
   attrib:
     description: It adds or removes attribute modifiers
     usage: /attrib <add|remove> [player] <attribute> <amount> <operation>
+  flyspeed:
+    description: It sets a player's flyspeed
+    usage: /flyspeed <amount>
+permissions:
+  lang.encant:
+    description: Allows usage of /encant
+    default: op
+  lang.attrib:
+    description: Allows usage of /attrib
+    default: op
+  lang.flyspeed:
+    description: Allows usage of /flyspeed
+    default: op

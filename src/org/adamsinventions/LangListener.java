@@ -88,21 +88,25 @@ public class LangListener implements Listener {
 		ler.add("Base");
 		ItemStack boots = new ItemStack(Material.DIAMOND_BOOTS);
 		ItemMeta im = boots.getItemMeta();
+		im.setUnbreakable(true);
 		im.setLore(ler);
 		boots.setItemMeta(im);
 		p.getInventory().setBoots(boots);
 		ItemStack leggings = new ItemStack(Material.DIAMOND_LEGGINGS);
 		im = leggings.getItemMeta();
+		im.setUnbreakable(true);
 		im.setLore(ler);
 		leggings.setItemMeta(im);
 		p.getInventory().setLeggings(leggings);
 		ItemStack chestplate = new ItemStack(Material.DIAMOND_CHESTPLATE);
 		im = chestplate.getItemMeta();
+		im.setUnbreakable(true);
 		im.setLore(ler);
 		chestplate.setItemMeta(im);
 		p.getInventory().setChestplate(chestplate);
 		ItemStack helmet = new ItemStack(Material.DIAMOND_HELMET);
 		im = helmet.getItemMeta();
+		im.setUnbreakable(true);
 		im.setLore(ler);
 		helmet.setItemMeta(im);
 		p.getInventory().setHelmet(helmet);
@@ -171,11 +175,11 @@ public class LangListener implements Listener {
 		meta.setLore(Arrays.asList("Wind"));
 		meta.setUnbreakable(true);
 		meta.addAttributeModifier(Attribute.GENERIC_MOVEMENT_SPEED, new AttributeModifier(UUID.randomUUID(), "GENERIC_MOVEMENT_SPEED", 0.4, 
-				Operation.MULTIPLY_SCALAR_1, EquipmentSlot.HAND));
+				Operation.MULTIPLY_SCALAR_1, EquipmentSlot.FEET));
 		meta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, new AttributeModifier(UUID.randomUUID(), "GENERIC_ARMOR", 3, 
-				Operation.ADD_NUMBER, EquipmentSlot.HAND));
+				Operation.ADD_NUMBER, EquipmentSlot.FEET));
 		meta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED, new AttributeModifier(UUID.randomUUID(), "GENERIC_ARMOR_TOUGHNESS", 2, 
-				Operation.ADD_NUMBER, EquipmentSlot.HAND));
+				Operation.ADD_NUMBER, EquipmentSlot.FEET));
 		meta.addEnchant(Enchantment.PROTECTION_FALL, 4, true);
 		bts.setItemMeta(meta);
 		WIND.setItem(26, bts);
@@ -532,8 +536,8 @@ public class LangListener implements Listener {
 				}
 				int slot = e.getWhoClicked().getInventory().first(m);
 				int aslot = -1;
-				if((aslot = e.getWhoClicked().getInventory().first(a)) == -1 || (e.getWhoClicked().getInventory().getItem(aslot).hasItemMeta() &&
-						e.getWhoClicked().getInventory().getItem(aslot).getItemMeta().getLore().size() != 2)) {
+				if((aslot = e.getWhoClicked().getInventory().first(a)) == -1 || !e.getWhoClicked().getInventory().getItem(aslot).hasItemMeta() ||
+						e.getWhoClicked().getInventory().getItem(aslot).getItemMeta().getLore().size() != 2) {
 					e.getWhoClicked().closeInventory();
 					e.getWhoClicked().sendMessage("§4§lYou do not have the required Artifact");
 					return;
@@ -584,7 +588,7 @@ public class LangListener implements Listener {
 							((Player) e.getWhoClicked()).setAllowFlight(true);
 							((Player) e.getWhoClicked()).setFlySpeed(0.05f);
 						}
-					} else if(m == Material.DIAMOND_CHESTPLATE) {
+					} else if(m == Material.DIAMOND_CHESTPLATE || m == Material.ELYTRA) {
 						ItemStack temp = e.getWhoClicked().getInventory().getChestplate();
 						if(this.playerArmorHas(e.getWhoClicked(), temp.getItemMeta().getLore().get(0)).size() == 1) {
 							if(temp.getItemMeta().getLore().get(0).contains("Water")) {
@@ -839,6 +843,17 @@ public class LangListener implements Listener {
 	
 	@EventHandler
 	public void onProjectileHit(ProjectileHitEvent e) {
+		ProtectedRegion[] rs = new ProtectedRegion[1];
+		WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(e.getEntity().getWorld())).getApplicableRegions(BlockVector3.at(e.getEntity().getLocation().getBlockX(), e.getEntity().getLocation().getBlockY(), e.getEntity().getLocation().getBlockZ())).getRegions().toArray(rs);
+		for(ProtectedRegion pr : rs) {
+			if(pr == null) {
+				continue;
+			}
+			if(LangPlugin.useFlag && pr.getFlag(LangPlugin.CAN_USE_BOW) != null && pr.getFlag(LangPlugin.CAN_USE_BOW) == StateFlag.State.DENY && !(e.getEntityType() == 
+					EntityType.PLAYER && e.getEntity().isOp() && ((Player) e.getEntity()).getGameMode() == GameMode.CREATIVE)) {
+				return;
+			}
+		}
 		if(e.getEntityType() == EntityType.ARROW) {
 			if(e.getEntity().getScoreboardTags().contains("thunder")) {
 				e.getEntity().getWorld().strikeLightning(e.getEntity().getLocation());
@@ -880,6 +895,9 @@ public class LangListener implements Listener {
 		ProtectedRegion[] rs = new ProtectedRegion[1];
 		WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(e.getEntity().getWorld())).getApplicableRegions(BlockVector3.at(e.getEntity().getLocation().getBlockX(), e.getEntity().getLocation().getBlockY(), e.getEntity().getLocation().getBlockZ())).getRegions().toArray(rs);
 		for(ProtectedRegion pr : rs) {
+			if(pr == null) {
+				continue;
+			}
 			if(LangPlugin.useFlag && pr.getFlag(LangPlugin.CAN_USE_BOW) == StateFlag.State.DENY && !(e.getEntity().getShooter() instanceof Player
 					&& ((Player) e.getEntity().getShooter()).isOp() && ((Player) e.getEntity().getShooter()).getGameMode() == GameMode.CREATIVE)) {
 				e.setCancelled(true);
@@ -912,7 +930,10 @@ public class LangListener implements Listener {
 		ProtectedRegion[] rs = new ProtectedRegion[1];
 		WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(e.getEntity().getWorld())).getApplicableRegions(BlockVector3.at(e.getEntity().getLocation().getBlockX(), e.getEntity().getLocation().getBlockY(), e.getEntity().getLocation().getBlockZ())).getRegions().toArray(rs);
 		for(ProtectedRegion pr : rs) {
-			if(LangPlugin.useFlag && pr.getFlag(LangPlugin.CAN_USE_BOW) == StateFlag.State.DENY && !(e.getEntityType() == 
+			if(pr == null) {
+				continue;
+			}
+			if(LangPlugin.useFlag && pr.getFlag(LangPlugin.CAN_USE_BOW) != null && pr.getFlag(LangPlugin.CAN_USE_BOW) == StateFlag.State.DENY && !(e.getEntityType() == 
 					EntityType.PLAYER && e.getEntity().isOp() && ((Player) e.getEntity()).getGameMode() == GameMode.CREATIVE)) {
 				e.setCancelled(true);
 				return;
@@ -964,12 +985,14 @@ public class LangListener implements Listener {
 			ler.add("Base");
 			ItemStack boots = new ItemStack(Material.DIAMOND_BOOTS);
 			ItemMeta im = boots.getItemMeta();
+			im.setUnbreakable(true);
 			im.setLore(ler);
 			boots.setItemMeta(im);
 			p.getInventory().setBoots(boots);
 			ItemStack leggings = new ItemStack(Material.DIAMOND_LEGGINGS);
 			im = leggings.getItemMeta();
 			im.setLore(ler);
+			im.setUnbreakable(true);
 			leggings.setItemMeta(im);
 			p.getInventory().setLeggings(leggings);
 			ItemStack chestplate = new ItemStack(Material.DIAMOND_CHESTPLATE);
@@ -979,6 +1002,7 @@ public class LangListener implements Listener {
 			p.getInventory().setChestplate(chestplate);
 			ItemStack helmet = new ItemStack(Material.DIAMOND_HELMET);
 			im = helmet.getItemMeta();
+			im.setUnbreakable(true);
 			im.setLore(ler);
 			helmet.setItemMeta(im);
 			p.getInventory().setHelmet(helmet);

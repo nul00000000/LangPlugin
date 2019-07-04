@@ -23,8 +23,17 @@ public class Commands implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		switch(label) {
 		case "encant":
-			return encant(sender, args);
+			if(sender.hasPermission("lang.encant"))
+				return encant(sender, args);
+			else {
+				sender.sendMessage("You do not have permission to do that command");
+				return true;
+			}
 		case "attrib":
+			if(!sender.hasPermission("lang.attrib")) {
+				sender.sendMessage("You do not have permission to do that command");
+				return true;
+			}
 			if(args.length <= 1) {
 				return false;
 			}
@@ -36,6 +45,27 @@ public class Commands implements CommandExecutor {
 				return removeattrib(sender, n);
 			}
 			return false;
+		case "flyspeed":
+			if(!sender.hasPermission("lang.flyspeed")) {
+				sender.sendMessage("You do not have permission to do that command");
+				return true;
+			}
+			float a = 0;
+			try {
+				a = Float.parseFloat(args[0]);
+			} catch(NumberFormatException e) {
+				sender.sendMessage("That is not a valid number");
+				return true;
+			} catch(IndexOutOfBoundsException e) {
+				return false;
+			}
+			if(sender instanceof Player) {
+				((Player) sender).setFlySpeed(a);
+			} else {
+				sender.sendMessage("You are not a player!");
+				return true;
+			}
+			return true;
 		default:
 			return false;
 		}

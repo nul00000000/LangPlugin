@@ -33,6 +33,7 @@ public class LangPlugin extends JavaPlugin {
 		Commands com = new Commands();
 		this.getCommand("encant").setExecutor(com);
 		this.getCommand("attrib").setExecutor(com);
+		this.getCommand("flyspeed").setExecutor(com);
 		this.getServer().getPluginManager().registerEvents(new LangListener(), this);
 	}
 
