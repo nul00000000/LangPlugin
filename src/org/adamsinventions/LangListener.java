@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.TreeType;
@@ -111,6 +112,7 @@ public class LangListener implements Listener {
 		helmet.setItemMeta(im);
 		p.getInventory().setHelmet(helmet);
 		p.getInventory().setStorageContents(BASE.inv.getStorageContents());
+		p.setAllowFlight(false);
 	}
 	
 	public LangListener() {
@@ -479,7 +481,7 @@ public class LangListener implements Listener {
 					if(item.getType() == Material.DIAMOND_SWORD || item.getType() == Material.DIAMOND_AXE || item.getType() == Material.TRIDENT) {
 						((LivingEntity) e.getEntity()).addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 100, 0, false, true, true));
 					}
-				} else if(item.hasItemMeta() && item.getItemMeta().getLore().get(0).contains("Explosions")) {
+				} else if(item.hasItemMeta() && item.getItemMeta().getLore().get(0).contains("Explosion")) {
 					if(item.getType() == Material.DIAMOND_SWORD || item.getType() == Material.DIAMOND_AXE || item.getType() == Material.TRIDENT) {
 						e.getEntity().getWorld().createExplosion(e.getEntity().getLocation(), 2f);
 					}
@@ -522,6 +524,10 @@ public class LangListener implements Listener {
 				}
 			}
 		}
+	}
+	
+	private void debug(String message) {
+		Bukkit.broadcastMessage("§1§l[Debug] §r§5" + message);
 	}
 	
 	@EventHandler
@@ -721,6 +727,7 @@ public class LangListener implements Listener {
 						return;
 					}
 				} else {
+					debug("Item switched");
 					e.getWhoClicked().getInventory().setItem(slot, e.getCurrentItem());
 				}
 				e.getWhoClicked().getInventory().getItem(aslot).setAmount(e.getWhoClicked().getInventory().getItem(aslot).getAmount() - 1);
@@ -810,6 +817,8 @@ public class LangListener implements Listener {
 			e.getPlayer().removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
 		} if(e.getPlayer().getInventory().getItem(e.getNewSlot()) == null && playerArmorHas(e.getPlayer(), "Tenacity").isEmpty()) {
 			e.getPlayer().removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
+		} if(e.getPlayer().getInventory().getItem(e.getNewSlot()) == null) {
+			e.getPlayer().removePotionEffect(PotionEffectType.REGENERATION);
 		}
 		
 		if(e.getPlayer().getInventory().getItem(e.getNewSlot()).getType() == Material.BOW && e.getPlayer().getInventory().getItem(e.getNewSlot())
@@ -838,6 +847,12 @@ public class LangListener implements Listener {
 			e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 1000000, 1, false, false, false));
 		} else if(playerArmorHas(e.getPlayer(), "Strength").isEmpty()) {
 			e.getPlayer().removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
+		}
+		
+		if(e.getPlayer().getInventory().getItem(e.getNewSlot()).getItemMeta().getLore().get(0).contains("Health")) {
+			e.getPlayer().addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 1000000, 1, false, false, false));
+		} else {
+			e.getPlayer().removePotionEffect(PotionEffectType.REGENERATION);
 		}
 	}
 	
@@ -915,7 +930,7 @@ public class LangListener implements Listener {
 				e.getEntity().addScoreboardTag("ice");
 			} else if(trident.getItemMeta().getLore().get(0).contains("Telekinesis")) {
 				e.getEntity().addScoreboardTag("tele");
-			} else if(trident.getItemMeta().getLore().get(0).contains("Explosions")) {
+			} else if(trident.getItemMeta().getLore().get(0).contains("Explosion")) {
 				e.getEntity().addScoreboardTag("explo");
 			} else if(trident.getItemMeta().getLore().get(0).contains("Light")) {
 				e.getEntity().addScoreboardTag("light");
@@ -966,7 +981,7 @@ public class LangListener implements Listener {
 		if(e.getBow().getItemMeta().getLore().get(0).contains("Telekinesis")) {
 			e.getProjectile().setGravity(false);
 		}
-		if(e.getBow().getItemMeta().getLore().get(0).contains("Explosions")) {
+		if(e.getBow().getItemMeta().getLore().get(0).contains("Explosion")) {
 			e.getProjectile().addScoreboardTag("explo");
 		}
 		if(e.getBow().getItemMeta().getLore().get(0).contains("Light")) {
